@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="theme-color" content="#2563eb" />
+  <title>School Attendance Portal</title>
+  <style>
+    :root {
+      --primary: #2563eb;
+      --success: #16a34a;
+      --warning: #d97706;
+      --danger: #dc2626;
+      --bg: #f3f4f6;
+      --card: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+    }
+
+    * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { margin: 0; background: var(--bg); color: var(--text); padding: 12px; }
+    .container { max-width: 540px; margin: 0 auto; }
+
+    /* Navigation Tabs */
+    .nav-tabs {
+      display: flex;
+      background: #e5e7eb;
+      border-radius: 10px;
+      padding: 4px;
+      margin-bottom: 16px;
+    }
+    .nav-tab {
+      flex: 1;
+      padding: 10px;
+      border: none;
+      border-radius: 8px;
+      background: transparent;
+      font-weight: 600;
+      font-size: 0.95rem;
+      color: var(--muted);
+      cursor: pointer;
+    }
+    .nav-tab.active {
+      background: var(--card);
+      color: var(--primary);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    }
+
+    .card {
+      background: var(--card);
+      border-radius: 12px;
+      padding: 16px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      margin-bottom: 14px;
+    }
+
+    h2 { font-size: 1.1rem; margin: 0 0 12px 0; color: var(--text); }
+    label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 5px; color: #4b5563; }
+    input, select, textarea {
+      width: 100%;
+      padding: 11px;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      font-size: 1rem;
+      margin-bottom: 12px;
+      background: #fff;
+    }
+
+    .row { display: flex; gap: 10px; }
+    .row > div { flex: 1; }
+
+    .count-box {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      padding: 12px 16px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+    }
+    .count-number { font-size: 1.5rem; font-weight: 700; color: var(--primary); }
+
+    .btn-primary {
+      width: 100%;
+      padding: 13px;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      color: white;
+      background: var(--primary);
+    }
+    .btn-primary:disabled { background: #9ca3af; cursor: not-allowed; }
+
+    .btn-lock {
+      padding: 7px 12px;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      background: #f9fafb;
+      color: #374151;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    #status { text-align: center; margin-top: 12px; font-weight: 600; font-size: 0.95rem; }
+
+    /* PIN Lock Gate */
+    .pin-card {
+      text-align: center;
+      padding: 28px 20px;
+    }
+    .pin-icon {
+      width: 48px;
+      height: 48px;
+      margin: 0 auto 12px;
+      background: #eff6ff;
+      color: var(--primary);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+    }
+    .pin-input {
+      max-width: 180px;
+      margin: 14px auto;
+      text-align: center;
+      font-size: 1.75rem;
+      font-weight: 700;
+      letter-spacing: 0.5rem;
+      padding: 12px;
+    }
+    .pin-error {
+      color: var(--danger);
+      font-size: 0.9rem;
+      font-weight: 600;
+      min-height: 20px;
+      margin-bottom: 10px;
+    }
+
+    /* Dashboard Stats Grid */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+    .stat-card {
+      background: var(--card);
+      padding: 14px;
+      border-radius: 10px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+      text-align: center;
+    }
+    .stat-val { font-size: 1.5rem; font-weight: 700; margin-bottom: 2px; }
+    .stat-lbl { font-size: 0.8rem; color: var(--muted); font-weight: 600; }
+
+    /* Pending Alert Box */
+    .pending-box {
+      background: #fffbeb;
+      border: 1px solid #fde68a;
+      border-radius: 10px;
+      padding: 14px;
+      margin-bottom: 14px;
+    }
+    .pending-title { font-weight: 700; color: var(--warning); margin-bottom: 8px; font-size: 0.95rem; }
+    .badge {
+      display: inline-block;
+      background: #fef3c7;
+      color: #92400e;
+      border: 1px solid #f59e0b;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin: 0 6px 6px 0;
+    }
+    .badge-ok { background: #dcfce7; color: #166534; border-color: #22c55e; }
+
+    /* Tables */
+    table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+    th, td { text-align: left; padding: 9px 6px; border-bottom: 1px solid #e5e7eb; }
+    th { color: var(--muted); font-size: 0.8rem; text-transform: uppercase; }
+    .hidden { display: none; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="nav-tabs">
+      <button class="nav-tab active" id="tabTeacherBtn" onclick="switchTab('teacher')">Teacher Entry</button>
+      <button class="nav-tab" id="tabPrincipalBtn" onclick="switchTab('principal')">Principal Dashboard</button>
+    </div>
+
+    <!-- TEACHER ENTRY VIEW -->
+    <div id="teacherView" class="card">
+      <h2>Daily Class Attendance</h2>
+
+      <label for="date">Date</label>
+      <input type="date" id="date" />
+
+      <div class="row">
+        <div>
+          <label for="classSelect">Class / Section</label>
+          <select id="classSelect" onchange="onClassChange()">
+            <option value="">Loading classes...</option>
+          </select>
+          <input type="text" id="classManual" class="hidden" placeholder="e.g., 10-A" />
+        </div>
+        <div>
+          <label for="totalStrength">Total Students</label>
+          <input type="number" id="totalStrength" placeholder="e.g., 45" min="1" />
+        </div>
+      </div>
+
+      <label for="teacherName">Class Teacher Name</label>
+      <input type="text" id="teacherName" placeholder="e.g., Mrs. Lakshmi" />
+
+      <label for="rollNumbers">Absentee Roll Numbers (leave blank if 0 absent)</label>
+      <textarea id="rollNumbers" rows="2" placeholder="e.g., 4, 12, 19, 25"></textarea>
+
+      <div class="count-box">
+        <span style="font-weight:600; color:var(--primary);">Total Absent Count</span>
+        <div class="count-number" id="absentCount">0</div>
+      </div>
+
+      <button class="btn-primary" id="submitBtn" onclick="submitAttendance()">Submit Attendance</button>
+      <div id="status"></div>
+    </div>
+
+    <!-- PRINCIPAL DASHBOARD VIEW -->
+    <div id="principalView" class="hidden">
+      <!-- 4-Digit Admin PIN Gate -->
+      <div id="pinGate" class="card pin-card">
+        <div class="pin-icon">&#128274;</div>
+        <h2 style="margin-bottom:4px;">Principal Access Only</h2>
+        <p style="margin:0; font-size:0.9rem; color:var(--muted);">Enter your 4-digit Admin PIN to view school reports</p>
+        <input
+          type="password"
+          id="pinInput"
+          class="pin-input"
+          inputmode="numeric"
+          pattern="[0-9]*"
+          maxlength="4"
+          placeholder="••••"
+          oninput="handlePinInput(this)"
+          onkeydown="if(event.key==='Enter') verifyPin()"
+        />
+        <div id="pinError" class="pin-error"></div>
+        <button class="btn-primary" style="max-width:220px;" onclick="verifyPin()">Unlock Dashboard</button>
+      </div>
+
+      <!-- Unlocked Dashboard Content -->
+      <div id="principalDashboard" class="hidden">
+        <div class="card" style="padding: 12px 16px;">
+          <div style="display:flex; align-items:center; justify-content:space-between; gap:8px;">
+            <div style="display:flex; align-items:center; gap:8px;">
+              <label for="dashDate" style="margin:0;">Date:</label>
+              <input type="date" id="dashDate" style="width:auto; margin:0; padding:7px;" onchange="loadDashboard()" />
+            </div>
+            <div style="display:flex; gap:6px;">
+              <button class="btn-lock" onclick="loadDashboard()">Refresh</button>
+              <button class="btn-lock" onclick="lockDashboard()">Lock</button>
+            </div>
+          </div>
+        </div>
+
+        <div id="dashLoading" style="text-align:center; padding:20px; color:var(--muted);">Loading school report...</div>
+
+        <div id="dashContent" class="hidden">
+          <!-- Daily Consolidated Totals -->
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-val" style="color:var(--danger);" id="statAbsent">0</div>
+              <div class="stat-lbl">Total Absent</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-val" style="color:var(--success);" id="statPresent">0</div>
+              <div class="stat-lbl">Total Present</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-val" style="color:var(--primary);" id="statPct">0%</div>
+              <div class="stat-lbl">Attendance Rate</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-val" id="statSubmitted">0 / 0</div>
+              <div class="stat-lbl">Classes Reported</div>
+            </div>
+          </div>
+
+          <!-- Pending Classes Tracker -->
+          <div class="pending-box" id="pendingBox">
+            <div class="pending-title" id="pendingTitle">Pending Submissions</div>
+            <div id="pendingList"></div>
+          </div>
+
+          <!-- Class-Wise Breakdown -->
+          <div class="card">
+            <h2>Class-Wise Absentee Report</h2>
+            <table>
+              <thead>
+                <tr>
+                  <th>Class</th>
+                  <th>Absent</th>
+                  <th>Roll Numbers</th>
+                </tr>
+              </thead>
+              <tbody id="classBreakdownBody"></tbody>
+            </table>
+          </div>
+
+          <!-- Weekly Consolidated -->
+          <div class="card">
+            <h2>Weekly Consolidated Absentees</h2>
+            <table>
+              <thead>
+                <tr>
+                  <th>Week Of</th>
+                  <th>Absent</th>
+                  <th>Present</th>
+                  <th>Rate</th>
+                </tr>
+              </thead>
+              <tbody id="weeklyBody"></tbody>
+            </table>
+          </div>
+
+          <!-- Monthly Consolidated -->
+          <div class="card">
+            <h2>Monthly Consolidated Absentees</h2>
+            <table>
+              <thead>
+                <tr>
+                  <th>Month</th>
+                  <th>Absent</th>
+                  <th>Present</th>
+                  <th>Rate</th>
+                </tr>
+              </thead>
+              <tbody id="monthlyBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyyh1LTCu977xxpgYzeDxnLus5ljjU45YWxuGrxeC-FkW6BSvnS6NOfI6Hrd3cIL809/exec';
+    const ADMIN_PIN = '2016'; // Change this to your 4-digit Principal PIN
+
+    let classMasterList = [];
+
+    const dateInput = document.getElementById('date');
+    const dashDateInput = document.getElementById('dashDate');
+    const classSelect = document.getElementById('classSelect');
+    const classManual = document.getElementById('classManual');
+    const strengthInput = document.getElementById('totalStrength');
+    const teacherInput = document.getElementById('teacherName');
+    const rollsInput = document.getElementById('rollNumbers');
+    const countDisplay = document.getElementById('absentCount');
+    const submitBtn = document.getElementById('submitBtn');
+    const statusDiv = document.getElementById('status');
+
+    function getLocalToday() {
+      const d = new Date();
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    }
+
+    const todayStr = getLocalToday();
+    dateInput.value = todayStr;
+    dashDateInput.value = todayStr;
+
+    function escapeHtml(str) {
+      return String(str).replace(/[&<>"']/g, m => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+      }[m]));
+    }
+
+    function isPrincipalUnlocked() {
+      return sessionStorage.getItem('principalUnlocked') === 'true';
+    }
+
+    function renderPrincipalLockState() {
+      const unlocked = isPrincipalUnlocked();
+      document.getElementById('pinGate').classList.toggle('hidden', unlocked);
+      document.getElementById('principalDashboard').classList.toggle('hidden', !unlocked);
+
+      if (unlocked) {
+        loadDashboard();
+      } else {
+        const pinInput = document.getElementById('pinInput');
+        pinInput.value = '';
+        document.getElementById('pinError').textContent = '';
+        setTimeout(() => pinInput.focus(), 50);
+      }
+    }
+
+    function handlePinInput(el) {
+      el.value = el.value.replace(/\D/g, '').slice(0, 4);
+      document.getElementById('pinError').textContent = '';
+      if (el.value.length === 4) {
+        verifyPin();
+      }
+    }
+
+    function verifyPin() {
+      const pinInput = document.getElementById('pinInput');
+      if (pinInput.value === ADMIN_PIN) {
+        sessionStorage.setItem('principalUnlocked', 'true');
+        renderPrincipalLockState();
+      } else {
+        document.getElementById('pinError').textContent = 'Incorrect PIN. Please try again.';
+        pinInput.value = '';
+        pinInput.focus();
+      }
+    }
+
+    function lockDashboard() {
+      sessionStorage.removeItem('principalUnlocked');
+      renderPrincipalLockState();
+    }
+
+    function switchTab(tab) {
+      const isTeacher = tab === 'teacher';
+      document.getElementById('teacherView').classList.toggle('hidden', !isTeacher);
+      document.getElementById('principalView').classList.toggle('hidden', isTeacher);
+      document.getElementById('tabTeacherBtn').classList.toggle('active', isTeacher);
+      document.getElementById('tabPrincipalBtn').classList.toggle('active', !isTeacher);
+
+      if (!isTeacher) {
+        renderPrincipalLockState();
+      }
+    }
+
+    function parseRolls(text) {
+      return [...new Set(text.split(/[\s,]+/).map(s => s.trim()).filter(Boolean))];
+    }
+
+    rollsInput.addEventListener('input', () => {
+      countDisplay.textContent = parseRolls(rollsInput.value).length;
+    });
+
+    function onClassChange() {
+      const selected = classSelect.value;
+      const found = classMasterList.find(c => c.className === selected);
+      if (found) {
+        if (found.totalStrength) strengthInput.value = found.totalStrength;
+        if (found.teacherName) teacherInput.value = found.teacherName;
+      }
+    }
+
+    async function loadDashboard() {
+      const targetDate = dashDateInput.value || todayStr;
+      document.getElementById('dashLoading').classList.remove('hidden');
+      document.getElementById('dashContent').classList.add('hidden');
+
+      try {
+        const res = await fetch(`${SCRIPT_URL}?date=${encodeURIComponent(targetDate)}`);
+        const data = await res.json();
+        if (data.status !== 'success') throw new Error(data.message);
+
+        // Populate Class Dropdown from Class_Master
+        classMasterList = data.classMaster || [];
+        if (classMasterList.length > 0) {
+          const savedClass = localStorage.getItem('savedClass') || '';
+          classSelect.innerHTML = '<option value="">-- Select Class --</option>' +
+            classMasterList.map(c =>
+              `<option value="${escapeHtml(c.className)}" ${c.className === savedClass ? 'selected' : ''}>${escapeHtml(c.className)}</option>`
+            ).join('');
+          classSelect.classList.remove('hidden');
+          classManual.classList.add('hidden');
+          if (savedClass) onClassChange();
+        } else {
+          classSelect.classList.add('hidden');
+          classManual.classList.remove('hidden');
+          classManual.value = localStorage.getItem('savedClass') || '';
+          strengthInput.value = localStorage.getItem('savedStrength') || '';
+          teacherInput.value = localStorage.getItem('savedTeacher') || '';
+        }
+
+        // Render Daily Stats
+        const { strength, absent, present } = data.dailyTotals;
+        const pct = strength > 0 ? ((present / strength) * 100).toFixed(1) + '%' : '0%';
+        const totalExpected = classMasterList.length || data.submittedToday.length;
+
+        document.getElementById('statAbsent').textContent = absent;
+        document.getElementById('statPresent').textContent = present;
+        document.getElementById('statPct').textContent = pct;
+        document.getElementById('statSubmitted').textContent = `${data.submittedToday.length} / ${totalExpected}`;
+
+        // Render Pending Classes
+        const pendingList = document.getElementById('pendingList');
+        const pendingTitle = document.getElementById('pendingTitle');
+        if (classMasterList.length === 0) {
+          pendingTitle.textContent = 'Pending Classes Tracker';
+          pendingList.innerHTML = '<span style="font-size:0.85rem; color:#6b7280;">Add classes to the Class_Master tab in Google Sheets to track pending submissions.</span>';
+        } else if (data.pendingToday.length === 0) {
+          pendingTitle.textContent = 'All Classes Submitted!';
+          pendingList.innerHTML = '<span class="badge badge-ok">100% Reported</span>';
+        } else {
+          pendingTitle.textContent = `Pending Submissions (${data.pendingToday.length})`;
+          pendingList.innerHTML = data.pendingToday.map(p =>
+            `<span class="badge">${escapeHtml(p.className)}${p.teacherName ? ' (' + escapeHtml(p.teacherName) + ')' : ''}</span>`
+          ).join('');
+        }
+
+        // Render Class-Wise Breakdown
+        const breakdownBody = document.getElementById('classBreakdownBody');
+        if (data.submittedToday.length === 0) {
+          breakdownBody.innerHTML = '<tr><td colspan="3" style="text-align:center; color:#6b7280;">No submissions for this date yet.</td></tr>';
+        } else {
+          breakdownBody.innerHTML = data.submittedToday.map(item => `
+            <tr>
+              <td><strong>${escapeHtml(item.className)}</strong></td>
+              <td style="color:var(--danger); font-weight:700;">${item.absentCount} / ${item.totalStrength}</td>
+              <td>${escapeHtml(item.rolls)}</td>
+            </tr>
+          `).join('');
+        }
+
+        // Render Weekly & Monthly Tables
+        renderSummaryTable('weeklyBody', data.weekly);
+        renderSummaryTable('monthlyBody', data.monthly);
+
+        document.getElementById('dashLoading').classList.add('hidden');
+        document.getElementById('dashContent').classList.remove('hidden');
+      } catch (err) {
+        document.getElementById('dashLoading').textContent = 'Unable to load report. Check SCRIPT_URL and internet connection.';
+      }
+    }
+
+    function renderSummaryTable(tbodyId, rows) {
+      const tbody = document.getElementById(tbodyId);
+      if (!rows || rows.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:#6b7280;">No data yet.</td></tr>';
+        return;
+      }
+      tbody.innerHTML = rows.map(r => {
+        const rate = r.strength > 0 ? ((r.present / r.strength) * 100).toFixed(1) + '%' : '0%';
+        return `
+          <tr>
+            <td><strong>${escapeHtml(r.period)}</strong></td>
+            <td style="color:var(--danger); font-weight:600;">${r.absent}</td>
+            <td style="color:var(--success);">${r.present}</td>
+            <td>${rate}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    async function submitAttendance() {
+      const date = dateInput.value;
+      const className = classSelect.classList.contains('hidden')
+        ? classManual.value.trim()
+        : classSelect.value.trim();
+      const totalStrength = strengthInput.value.trim();
+      const teacherName = teacherInput.value.trim();
+      const rolls = parseRolls(rollsInput.value);
+
+      if (!date || !className || !totalStrength || !teacherName) {
+        alert('Please fill in Date, Class, Total Students, and Teacher Name.');
+        return;
+      }
+
+      localStorage.setItem('savedClass', className);
+      localStorage.setItem('savedStrength', totalStrength);
+      localStorage.setItem('savedTeacher', teacherName);
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Submitting...';
+      statusDiv.textContent = '';
+
+      const payload = {
+        date,
+        className,
+        totalStrength: Number(totalStrength),
+        absentCount: rolls.length,
+        rolls: rolls.length > 0 ? rolls.join(', ') : 'None',
+        teacherName
+      };
+
+      try {
+        const response = await fetch(SCRIPT_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify(payload)
+        });
+        const result = await response.json();
+
+        if (result.status === 'success') {
+          statusDiv.style.color = '#16a34a';
+          const verb = result.action === 'updated' ? 'Updated existing record' : 'Submitted';
+          statusDiv.textContent = `${verb} for Class ${className} (Absent: ${rolls.length})`;
+          rollsInput.value = '';
+          countDisplay.textContent = '0';
+          loadDashboard();
+        } else {
+          throw new Error(result.message);
+        }
+      } catch (err) {
+        statusDiv.style.color = '#dc2626';
+        statusDiv.textContent = 'Submission failed. Check internet and try again.';
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Submit Attendance';
+      }
+    }
+
+    // Load class master list on startup so Teacher Entry dropdown is ready
+    loadDashboard();
+  </script>
+</body>
+</html>
